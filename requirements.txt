@@ -1,0 +1,25 @@
+# Phase 1: Data Setup
+pandas==2.1.4
+numpy==1.26.2
+sqlite3  # Built-in with Python
+
+# Data Validation
+pydantic==2.5.3
+
+# Configuration
+pyyaml==6.0.1
+python-dotenv==1.0.0
+
+# Phase 2: Agent (Will be added later)
+# langchain==0.1.0
+# openai==1.6.1
+# langchain-community==0.0.13
+
+# Phase 3: Visualization (Will be added later)
+# matplotlib==3.8.2
+# streamlit==1.29.0
+
+# Development
+pytest==7.4.3
+black==23.12.1
+flake8==7.0.0

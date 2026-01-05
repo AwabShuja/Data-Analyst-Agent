@@ -1,0 +1,44 @@
+# Database Configuration
+database:
+  raw_csv_path: "data/raw/Order_by_Outlet_type.csv"
+  processed_db_path: "data/processed/orders.db"
+  
+  # Table names
+  tables:
+    orders: "orders"
+    customers: "customers"
+    products: "products"
+    brands: "brands"
+    categories: "categories"
+
+# Data Enrichment Settings
+enrichment:
+  # Price ranges by category (in local currency)
+  price_ranges:
+    "Food & Restaurants": [200, 3000]
+    "Market Place": [500, 15000]
+    "Stores & Grocery": [300, 8000]
+    "Health & Fitness": [400, 5000]
+    "Health, Beauty & Gifts": [300, 4000]
+    "Fashion": [800, 12000]
+    "default": [300, 5000]
+  
+  # Quantity ranges
+  quantity_range: [1, 5]
+  
+  # Product name templates
+  product_templates:
+    "Food & Restaurants": ["Meal Deal", "Combo", "Special", "Platter", "Family Pack"]
+    "Fashion": ["Shirt", "Dress", "Jeans", "Shoes", "Bag"]
+    "Market Place": ["Electronics", "Home Item", "Gadget", "Appliance"]
+    "Stores & Grocery": ["Grocery Pack", "Staples Bundle", "Fresh Items"]
+
+# Schema Documentation
+schema:
+  description: "E-commerce orders database with normalized tables"
+  version: "1.0"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/data_setup.log"
