@@ -38,6 +38,39 @@ schema:
   description: "E-commerce orders database with normalized tables"
   version: "1.0"
 
+# SQL Safety Configuration (Phase 2A)
+safety:
+  # Maximum rows allowed in query results
+  max_rows: 10000
+  
+  # Query execution timeout in seconds
+  query_timeout_seconds: 30
+  
+  # Dangerous SQL keywords to block
+  dangerous_keywords:
+    - DELETE
+    - DROP
+    - UPDATE
+    - INSERT
+    - ALTER
+    - CREATE
+    - TRUNCATE
+    - REPLACE
+    - GRANT
+    - REVOKE
+    - EXEC
+    - EXECUTE
+  
+  # Tables that require WHERE clause (large tables)
+  require_where_tables:
+    - orders
+  
+  # Enable query auditing
+  audit_enabled: true
+  
+  # Audit database path
+  audit_db_path: "data/processed/query_audit.db"
+
 # Logging
 logging:
   level: "INFO"
