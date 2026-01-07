@@ -32,17 +32,22 @@ AI Data Analyst Agent/
 │   ├── database/                 # Database setup & query helpers
 │   │   ├── setup_database.py    # Creates normalized star schema
 │   │   └── db_helper.py         # Query utilities & verification
-│   ├── safety/                   # ✨ NEW: SQL safety layer (Phase 2A)
+│   ├── safety/                   # ✅ SQL safety layer (Phase 2A)
 │   │   ├── validator.py         # Query validation & safety checks
 │   │   ├── execution_engine.py  # Safe query execution
 │   │   └── audit.py            # Query audit logging
+│   ├── mcp/                      # ✅ MCP server (Phase 2B)
+│   │   ├── server.py           # Main MCP server
+│   │   ├── resources.py        # Database resources (schema, stats, examples)
+│   │   └── tools.py            # Query execution tools
 │   ├── utils/
 │   │   └── data_enrichment.py   # Smart data pipeline
-│   └── mcp/                      # MCP server (Phase 2B - coming next)
+│   └── agent/                    # LLM agent (Phase 2C - coming next)
 ├── config/
-│   └── config.yaml              # Centralized configuration + safety settings
-├── examples.py                   # ✨ NEW: 7 usage examples for Phase 2A
-├── manual_test.py               # ✨ NEW: Interactive testing guide
+│   └── config.yaml              # Centralized configuration + safety + MCP settings
+├── examples.py                   # Phase 2A usage examples
+├── manual_test.py               # Interactive testing guide
+├── demo_mcp.py                  # ✨ NEW: MCP server demo
 ├── PHASE_2A_SUMMARY.md          # ✨ NEW: Complete Phase 2A documentation
 ├── README.md                     # Complete project documentation
 ├── requirements.txt              # Python dependencies
@@ -238,32 +243,56 @@ with DatabaseHelper() as db:
 
 ---
 
-### 🔄 Phase 2B: MCP Server (Next)
+### ✅ Phase 2B: MCP Server **[COMPLETED]**
 
-**What will be built:**
-- **MCP Server**: Model Context Protocol server for AI tool integration
-- **Resources**: Expose database schema as MCP resources
-  - `db://schema/all` - Complete schema with tables, columns, types
-  - `db://stats/summary` - Database statistics and row counts
-  - `db://examples/queries` - Sample SQL queries for reference
-- **Tools**: Expose safe query execution as MCP tools
-  - `execute_safe_query(sql)` - Validated SQL execution
-  - `validate_query(sql)` - Check query safety without execution
-  - `get_table_preview(table, limit)` - Quick data peek
+**What was built:**
+- ✅ **MCP Server**: Model Context Protocol server implementation
+  - Server info and capabilities endpoint
+  - MCP protocol request handler
+  - Resource and tool management
+- ✅ **Resources (4 types)**: Database information as MCP resources
+  - `db://schema/all` - Complete schema with tables, columns, row counts
+  - `db://stats/summary` - Database statistics and query performance metrics
+  - `db://examples/queries` - 8 example SQL queries (basic to advanced)
+  - `db://safety/rules` - SQL safety rules and validation constraints
+- ✅ **Tools (4 types)**: Query operations as MCP tools
+  - `execute_safe_query(sql)` - Safe validated SQL execution
+  - `validate_query(sql)` - Query validation without execution
+  - `get_table_preview(table, limit)` - Sample data preview
+  - `get_query_suggestions(question)` - SQL suggestions from NL questions
+- ✅ **Configuration**: Added MCP settings to config.yaml
+- ✅ **Testing**: Comprehensive MCP server test script
 
-**Why MCP matters:**
-- **Industry standard** for AI tool integration (2024-2025)
-- **Framework-agnostic**: Works with any LLM (Claude, GPT, Ollama)
-- Shows understanding of **modern AI architectures**
-- Makes agent reusable across different AI systems
+**Key accomplishments:**
+- 600+ lines of MCP implementation code
+- MCP protocol-compliant architecture
+- 4 resources + 4 tools fully functional
+- Integrates seamlessly with Phase 2A safety layer
+- Framework-agnostic design
+
+**Test Results:**
+```
+✅ 4 resources exposed (schema, stats, examples, rules)
+✅ 4 tools operational (execute, validate, preview, suggest)
+✅ MCP protocol request handling working
+✅ All operations validated through safety layer
+✅ Complete audit logging maintained
+```
+
+**Why this is portfolio-ready:**
+- Shows understanding of **MCP protocol** (industry standard 2024-2025)
+- Demonstrates **API design** and **protocol implementation** skills
+- **Framework-agnostic** architecture (works with any LLM client)
+- Makes database accessible to **any AI agent** (Claude, GPT, Ollama)
 
 ---
 
-### 🔄 Phase 2C: LLM Agent
+### 🔄 Phase 2C: LLM Agent (Next)
 
 **What will be built:**
 - **Ollama Integration**: Local LLM (Llama 3.1) for free inference
 - **LangChain SQL Agent**: Natural language → SQL conversion
+- **MCP Client**: Connects to MCP server for database access
 - **Self-Correction Loop**: Agent retries on validation errors
 - **Result Interpreter**: Converts SQL results to insights
 - **Recommendation Engine**: Provides business recommendations
@@ -315,16 +344,16 @@ Agent:
 
 ## 🔧 Tech Stack
 
-### Current (Phase 1 & 2A)
+### Current (Phase 1, 2A & 2B)
 - **Database**: SQLite 3
 - **Data Processing**: Pandas, NumPy
 - **Configuration**: PyYAML, python-dotenv
 - **Validation**: Pydantic
 - **Safety**: Custom SQL validator with audit logging
+- **MCP**: Model Context Protocol (manual implementation)
 - **Language**: Python 3.13
 
-### Upcoming (Phase 2B+)
-- **MCP**: Model Context Protocol SDK
+### Upcoming (Phase 2C+)
 - **LLM**: Ollama (Llama 3.1) - free, local
 - **Framework**: LangChain (SQL agent, tools, chains)
 - **UI**: Streamlit
@@ -489,8 +518,8 @@ schema:
 
 - [x] **Phase 1**: Data Setup ✅ **COMPLETED**
 - [x] **Phase 2A**: SQL Safety Layer ✅ **COMPLETED**
-- [ ] **Phase 2B**: MCP Server (In Progress)
-- [ ] **Phase 2C**: LLM Agent
+- [x] **Phase 2B**: MCP Server ✅ **COMPLETED**
+- [ ] **Phase 2C**: LLM Agent (Next)
 - [ ] **Phase 3**: Evaluation & Metrics
 - [ ] **Phase 4**: Polish & Demo
 
@@ -498,26 +527,28 @@ schema:
 
 ## 🤝 Contributing / Next Steps
 
-**Phase 2A is production-ready!** 
+**Phase 2B is production-ready!** 
 
 ### ✅ What's Working Now:
-- Complete SQL safety validation system
-- Audit logging with statistics
-- Safe query execution engine
-- Comprehensive test suite
+- Complete MCP server implementation
+- 4 database resources exposed (schema, stats, examples, rules)
+- 4 operational tools (execute, validate, preview, suggest)
+- MCP protocol compliant request handling
+- Seamless integration with Phase 2A safety layer
 
-### 🔜 Next Step: Phase 2B - MCP Server
-Ready to build the Model Context Protocol server that will expose the database to LLM agents.
+### 🔜 Next Step: Phase 2C - LLM Agent
+Ready to integrate Ollama + LangChain to create the conversational AI agent that uses the MCP server.
 
 ---
 
 ## 📧 Project Info
 
-**Status**: Phase 2A Complete ✅ (Safety Layer)  
-**Last Updated**: January 6, 2026  
-**Version**: 1.1.0  
+**Status**: Phase 2B Complete ✅ (MCP Server)  
+**Last Updated**: January 7, 2026  
+**Version**: 2.0.0  
 
 **Dataset**: E-commerce orders (May-July 2023)  
 **Database**: SQLite, 6.2 MB, Star Schema  
-**Code Quality**: 1,300+ lines, modular, type-hinted, documented  
-**Safety**: SQL validator, audit logging, comprehensive tests
+**Code Quality**: 2,000+ lines, modular, type-hinted, documented  
+**Safety**: SQL validator with audit logging  
+**MCP**: 4 resources + 4 tools, protocol-compliant

@@ -71,6 +71,26 @@ safety:
   # Audit database path
   audit_db_path: "data/processed/query_audit.db"
 
+# MCP Server Configuration (Phase 2B)
+mcp:
+  # Server information
+  server_name: "AI Data Analyst Database Server"
+  server_version: "1.0.0"
+  
+  # Resources configuration
+  resources:
+    expose_schema: true
+    expose_statistics: true
+    expose_examples: true
+    expose_safety_rules: true
+  
+  # Tools configuration
+  tools:
+    execute_queries: true
+    validate_queries: true
+    preview_tables: true
+    suggest_queries: true
+
 # Logging
 logging:
   level: "INFO"
