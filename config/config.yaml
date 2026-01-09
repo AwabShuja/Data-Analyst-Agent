@@ -91,6 +91,28 @@ mcp:
     preview_tables: true
     suggest_queries: true
 
+# LLM Agent Configuration (Phase 2C)
+agent:
+  # Groq API settings
+  llm_provider: "groq"
+  model: "llama-3.3-70b-versatile"  # Options: llama-3.3-70b-versatile, mixtral-8x7b-32768
+  
+  # Generation parameters
+  temperature: 0.1  # Lower = more deterministic SQL generation
+  max_tokens: 2048
+  
+  # Self-correction settings
+  max_retries: 2  # Number of correction attempts for failed queries
+  enable_self_correction: true
+  
+  # Interpretation settings
+  interpretation_temperature: 0.3  # Slightly higher for natural language
+  interpretation_max_tokens: 512
+  
+  # Context settings
+  include_schema_context: true  # Include schema info in prompts
+  max_conversation_history: 50  # Max queries to keep in memory
+
 # Logging
 logging:
   level: "INFO"
