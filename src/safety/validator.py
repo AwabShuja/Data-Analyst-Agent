@@ -35,7 +35,8 @@ class SQLValidator:
         """
         self.db_path = db_path
         self.config = config
-        self.conn = sqlite3.connect(db_path)
+        # check_same_thread=False for Streamlit compatibility
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.cursor = self.conn.cursor()
         
         # Load tables and columns from database

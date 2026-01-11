@@ -5,6 +5,8 @@ Converts natural language to SQL using Groq LLM and executes safely.
 
 import json
 import sys
+import yaml
+import pandas as pd
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -33,9 +35,10 @@ class SQLAgent:
         self, 
         db_path: str,
         api_key: Optional[str] = None,
-        model: str = "llama-3.3-70b-versatile",
-        max_retries: int = 2,
-        temperature: float = 0.1
+        model: Optional[str] = None,
+        max_retries: Optional[int] = None,
+        temperature: Optional[float] = None,
+        config_path: str = "config/config.yaml"
     ):
         """
         Initialize SQL agent.
@@ -43,12 +46,28 @@ class SQLAgent:
         Args:
             db_path: Path to SQLite database
             api_key: Groq API key (or set GROQ_API_KEY env var)
-            model: Groq model to use
-            max_retries: Max correction attempts for failed queries
-            temperature: LLM temperature (lower = more deterministic)
+            model: Groq model to use (default: from config.yaml)
+            max_retries: Max correction attempts for failed queries (default: from config.yaml)
+            temperature: LLM temperature (default: from config.yaml)
+            config_path: Path to configuration file
         """
+        # Load configuration
+        config_file = Path(config_path)
+        if not config_file.exists():
+            # Try relative to project root
+            config_file = Path(__file__).parent.parent.parent / config_path
+        
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f)
+        
+        # Use config defaults if parameters not provided
+        agent_config = config.get('agent', {})
+        model = model or agent_config.get('model', 'llama-3.3-70b-versatile')
+        max_retries = max_retries if max_retries is not None else agent_config.get('max_retries', 2)
+        temperature = temperature if temperature is not None else agent_config.get('temperature', 0.1)
+        
         self.llm = GroqLLM(api_key=api_key, model=model)
-        self.engine = SafeQueryEngine(db_path)
+        self.engine = SafeQueryEngine(db_path, config)
         self.prompts = PromptManager()
         self.max_retries = max_retries
         self.temperature = temperature
@@ -116,6 +135,9 @@ class SQLAgent:
             
         except Exception as e:
             response["error"] = f"Agent error: {str(e)}"
+            # Ensure sql_query is a string, not None
+            if response["sql_query"] is None:
+                response["sql_query"] = ""
         
         # Track conversation
         self.conversation_history.append(response)
@@ -205,18 +227,20 @@ class SQLAgent:
             "retries": retries
         }
     
-    def _interpret_results(self, question: str, query: str, results: List[Dict]) -> str:
+    def _interpret_results(self, question: str, query: str, df: pd.DataFrame) -> str:
         """Generate business-friendly interpretation of results."""
-        # Format results for LLM
-        if not results:
+        # Convert DataFrame to list of dicts
+        if df.empty:
             results_str = "No results found."
-        elif len(results) <= 5:
-            results_str = json.dumps(results, indent=2)
         else:
-            # Show first 3 and last 2 for large result sets
-            sample = results[:3] + results[-2:]
-            results_str = json.dumps(sample, indent=2)
-            results_str += f"\n... ({len(results)} total rows)"
+            results = df.to_dict('records')
+            if len(results) <= 5:
+                results_str = json.dumps(results, indent=2)
+            else:
+                # Show first 3 and last 2 for large result sets
+                sample = results[:3] + results[-2:]
+                results_str = json.dumps(sample, indent=2)
+                results_str += f"\n... ({len(results)} total rows)"
         
         prompt = self.prompts.get_interpretation_prompt(question, query, results_str)
         

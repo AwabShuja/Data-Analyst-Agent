@@ -13,14 +13,14 @@ from datetime import datetime
 class GroqLLM:
     """Interface to Groq's fast inference API."""
     
-    def __init__(self, api_key: Optional[str] = None, model: str = "llama-3.3-70b-versatile"):
+    def __init__(self, api_key: Optional[str] = None, model: str = "llama-3.1-8b-instant"):
         """
         Initialize Groq LLM interface.
         
         Args:
             api_key: Groq API key (or set GROQ_API_KEY env var)
-            model: Model to use (default: llama-3.3-70b-versatile)
-                   Options: llama-3.3-70b-versatile, mixtral-8x7b-32768
+            model: Model to use (default: llama-3.1-8b-instant)
+                   Options: llama-3.1-8b-instant, llama-3.3-70b-versatile, mixtral-8x7b-32768
         """
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         if not self.api_key:
@@ -87,8 +87,17 @@ class GroqLLM:
             }
             
         except requests.exceptions.RequestException as e:
+            error_details = str(e)
+            # Try to extract more details from response
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_json = e.response.json()
+                    error_details = f"{error_details} - {error_json}"
+                except:
+                    error_details = f"{error_details} - Response: {e.response.text[:200]}"
+            
             return {
-                "error": str(e),
+                "error": error_details,
                 "content": None,
                 "timestamp": datetime.now().isoformat()
             }

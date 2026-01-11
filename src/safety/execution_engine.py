@@ -44,8 +44,8 @@ class SafeQueryEngine:
         else:
             self.auditor = None
         
-        # Database connection
-        self.conn = sqlite3.connect(db_path)
+        # Database connection (check_same_thread=False for Streamlit compatibility)
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
     
     def execute_query(self, query: str, timeout: Optional[int] = None) -> Dict[str, Any]:
         """
