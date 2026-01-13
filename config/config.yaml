@@ -95,7 +95,7 @@ mcp:
 agent:
   # Groq API settings
   llm_provider: "groq"
-  model: "llama-3.3-70b-versatile"  # Options: llama-3.3-70b-versatile, mixtral-8x7b-32768
+  model: "llama-3.1-8b-instant"  # Options: llama-3.1-8b-instant, llama-3.3-70b-versatile, mixtral-8x7b-32768
   
   # Generation parameters
   temperature: 0.1  # Lower = more deterministic SQL generation
@@ -112,6 +112,30 @@ agent:
   # Context settings
   include_schema_context: true  # Include schema info in prompts
   max_conversation_history: 50  # Max queries to keep in memory
+
+# Evaluation Configuration (Phase 3)
+evaluation:
+  # Metrics storage
+  metrics_db_path: "data/processed/metrics.db"
+  
+  # Test questions
+  default_difficulty: null  # null for all, or "easy", "medium", "hard"
+  default_max_questions: null  # null for all questions
+  
+  # A/B Testing
+  ab_testing:
+    enabled: true
+    save_results: true
+    
+  # Baseline configurations for comparison
+  baseline_config:
+    model: "llama-3.1-70b-versatile"
+    temperature: 0.1
+    max_retries: 0  # No self-correction for baseline
+  
+  # Report settings
+  save_detailed_results: true
+  results_dir: "data/evaluation_results"
 
 # Logging
 logging:

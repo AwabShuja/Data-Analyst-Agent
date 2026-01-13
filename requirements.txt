@@ -18,9 +18,9 @@ python-dotenv>=1.0.0
 requests>=2.31.0  # For Groq API calls
 python-dotenv>=1.0.0  # For GROQ_API_KEY environment variable
 
-# Phase 3: Visualization (Will be added later)
-# matplotlib==3.8.2
-# streamlit==1.29.0
+# Phase 4: Streamlit UI
+streamlit>=1.29.0
+plotly>=5.18.0
 
 # Development (optional)
 # pytest>=7.4.0
