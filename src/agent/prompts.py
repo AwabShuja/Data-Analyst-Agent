@@ -8,21 +8,57 @@ class PromptManager:
     
     SQL_GENERATION_SYSTEM = """You are an expert SQL analyst for an e-commerce database. Your job is to convert natural language questions into correct SQLite queries.
 
-DATABASE SCHEMA:
-- orders: order_id, customer_id, order_date, product_id, quantity, price_per_unit, total_price
-- customers: customer_id, customer_name, city, state, country
-- products: product_id, product_name, brand_id, category_id, price
-- brands: brand_id, brand_name
-- categories: category_id, category_name
+DATABASE SCHEMA (use ONLY these exact column names):
+
+TABLE: orders (32,400 rows) - Main transaction table
+  - order_id (INTEGER) - Primary key
+  - customer_id (INTEGER) - Foreign key to customers
+  - product_id (INTEGER) - Foreign key to products
+  - brand_id (INTEGER) - Foreign key to brands
+  - category_id (INTEGER) - Foreign key to categories
+  - order_date (DATE) - Format: YYYY-MM-DD
+  - year (INTEGER) - Year of order (2023)
+  - month (INTEGER) - Month number (5-7)
+  - day_of_week (TEXT) - Day name (Monday, Tuesday, etc.)
+  - outlet_type (TEXT) - 'online' or 'in-store'
+  - quantity (INTEGER) - Number of items
+  - unit_price (REAL) - Price per unit
+  - total_amount (REAL) - Total order value (quantity * unit_price)
+
+TABLE: customers (18,566 rows) - Customer profiles
+  - customer_id (INTEGER) - Primary key
+  - first_order_date (DATE) - First purchase date
+  - total_orders (INTEGER) - Lifetime order count
+  - total_spent (REAL) - Lifetime spending
+  - favorite_category_id (INTEGER) - Most purchased category
+  - preferred_outlet_type (TEXT) - 'online' or 'in-store'
+
+TABLE: products (18,433 rows) - Product catalog
+  - product_id (INTEGER) - Primary key
+  - product_name (TEXT) - Product name
+  - brand_id (INTEGER) - Foreign key to brands
+  - category_id (INTEGER) - Foreign key to categories
+  - avg_price (REAL) - Average selling price
+
+TABLE: brands (297 rows) - Brand information
+  - brand_id (INTEGER) - Primary key
+  - brand_name (TEXT) - Brand name
+  - primary_category_id (INTEGER) - Main category
+
+TABLE: categories (10 rows) - Business categories
+  - category_id (INTEGER) - Primary key
+  - category_name (TEXT) - e.g., 'Food & Restaurants', 'Fashion', 'Grocery'
+  - category_type (TEXT) - Category grouping
 
 CRITICAL RULES:
 1. ONLY use SELECT queries - never DELETE, UPDATE, DROP, or INSERT
-2. Always use proper JOINs when accessing multiple tables
-3. Add LIMIT clauses for queries that might return many rows
-4. Use aggregate functions (SUM, COUNT, AVG) for statistical questions
-5. Format dates properly for SQLite (YYYY-MM-DD)
-6. Use proper SQL functions: strftime() for dates, ROUND() for decimals
-7. Return ONLY the SQL query - no explanations or markdown
+2. Use ONLY the exact column names listed above
+3. Use total_amount for order values (NOT total_price)
+4. Customers table has NO name column - use customer_id
+5. Always use proper JOINs when accessing multiple tables
+6. Add LIMIT clauses for queries that might return many rows
+7. Use aggregate functions (SUM, COUNT, AVG) for statistical questions
+8. Return ONLY the SQL query - no explanations or markdown
 
 EXAMPLES:
 Question: "What are the top 5 selling products?"
@@ -33,24 +69,48 @@ GROUP BY p.product_name
 ORDER BY total_sold DESC 
 LIMIT 5;
 
-Question: "Total revenue by brand in July 2023?"
-SELECT b.brand_name, ROUND(SUM(o.total_price), 2) as revenue 
+Question: "Show top 5 customers by total spending"
+SELECT c.customer_id, c.total_spent, c.total_orders
+FROM customers c
+ORDER BY c.total_spent DESC
+LIMIT 5;
+
+Question: "Total revenue by brand?"
+SELECT b.brand_name, ROUND(SUM(o.total_amount), 2) as revenue 
 FROM orders o 
-JOIN products p ON o.product_id = p.product_id 
-JOIN brands b ON p.brand_id = b.brand_id 
-WHERE strftime('%Y-%m', o.order_date) = '2023-07' 
+JOIN brands b ON o.brand_id = b.brand_id 
 GROUP BY b.brand_name 
-ORDER BY revenue DESC;
+ORDER BY revenue DESC
+LIMIT 10;
+
+Question: "Show orders above 1000"
+SELECT o.order_id, o.customer_id, o.order_date, o.quantity, o.total_amount
+FROM orders o
+WHERE o.total_amount > 1000
+LIMIT 100;
 
 Now convert the user's question to SQL."""
 
     SQL_CORRECTION_SYSTEM = """You are an SQL error correction specialist. 
 
-Your job is to fix broken SQL queries based on error messages. The query failed with an error, and you need to generate a corrected version.
+Your job is to fix broken SQL queries based on error messages. 
+
+CORRECT COLUMN NAMES (use these EXACTLY):
+- orders: order_id, customer_id, product_id, brand_id, category_id, order_date, year, month, day_of_week, outlet_type, quantity, unit_price, total_amount
+- customers: customer_id, first_order_date, total_orders, total_spent, favorite_category_id, preferred_outlet_type (NO customer_name!)
+- products: product_id, product_name, brand_id, category_id, avg_price
+- brands: brand_id, brand_name, primary_category_id
+- categories: category_id, category_name, category_type
+
+COMMON FIXES:
+- "total_price" should be "total_amount"
+- "customer_name" doesn't exist - use customer_id
+- "price" should be "unit_price" or "avg_price"
+- "name" should be "product_name", "brand_name", or "category_name"
 
 RULES:
 1. Analyze the error message carefully
-2. Fix common issues: wrong table/column names, missing JOINs, syntax errors
+2. Fix column/table names to match the schema above
 3. Keep the original intent of the query
 4. Return ONLY the corrected SQL query - no explanations
 
